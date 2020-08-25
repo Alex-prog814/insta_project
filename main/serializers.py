@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Post, Comment
+from .models import Post, Comment, Tag
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -21,12 +21,17 @@ class CommentSerializer(serializers.ModelSerializer):
         return representation
 
 
+# class TagSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Tag
+#         fields = ('title', )
+
 class PostSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format='%d-%m-%Y %H:%M:%S', read_only=True)
-
+    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='slug')
     class Meta:
         model = Post
-        fields = ('text', 'image', 'created_at', 'id')
+        fields = ('text', 'image', 'created_at', 'id', 'tags')
 
     def __get_image_url(self, instance):
         request = self.context.get('request')
@@ -52,3 +57,6 @@ class PostSerializer(serializers.ModelSerializer):
         representation['author'] = instance.author.email
         representation['image'] = self.__get_image_url(instance)
         return representation
+
+
+

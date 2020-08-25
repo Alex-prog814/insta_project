@@ -5,16 +5,30 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django_filters import rest_framework as filters
 
 from .models import Post, Comment
 from .permissions import IsPostAuthor
 from .serializers import PostSerializer, CommentSerializer
 
 
+class CharFilterInFilter(filters.BaseInFilter, filters.CharFilter):
+    pass
+
+
+class TagFilter(filters.FilterSet):
+    title = CharFilterInFilter(field_name='tags__title')
+
+    class Meta:
+        model = Post
+        fields = ('tags',)
+
+
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated, IsPostAuthor]
+    filterset_class = TagFilter
 
     def get_serializer_context(self):
         return {'request': self.request}
@@ -59,3 +73,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         queryset = queryset.filter(author=request.user)
         serializer = PostSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
