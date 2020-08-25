@@ -6,7 +6,19 @@ from .models import Post, Comment
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ('text', 'post_id', 'created_at', 'id', 'author')
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['author_id'] = request.user.id
+        comment = Comment.objects.create(**validated_data)
+        return comment
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['author'] = instance.author.email
+        representation['text'] = instance.text
+        return representation
 
 
 class PostSerializer(serializers.ModelSerializer):
