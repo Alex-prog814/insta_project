@@ -7,9 +7,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters import rest_framework as filters
 
-from .models import Post, Comment
+from .mixins import LikedMixin
+from .models import Post, Comment, Tag
 from .permissions import IsPostAuthor
-from .serializers import PostSerializer, CommentSerializer
+from .serializers import PostSerializer, CommentSerializer, TagSerializer
 
 
 class CharFilterInFilter(filters.BaseInFilter, filters.CharFilter):
@@ -24,7 +25,7 @@ class TagFilter(filters.FilterSet):
         fields = ('tags',)
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostViewSet(LikedMixin, viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated, IsPostAuthor]
@@ -75,4 +76,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class TagViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
 

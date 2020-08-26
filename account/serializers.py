@@ -59,3 +59,10 @@ class LoginSerializer(serializers.Serializer):
         return attrs
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email', 'image')
+
+
+
