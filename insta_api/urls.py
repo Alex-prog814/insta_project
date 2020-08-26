@@ -19,22 +19,18 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
+from account.views import ProfileViewSet
 from main.views import PostViewSet, CommentViewSet
 
 router = DefaultRouter()
 router.register('comments', CommentViewSet)
 router.register('posts', PostViewSet)
-
-# comment_viewset = CommentViewSet.as_view({
-#     'get': 'retrieve',
-#     'patch': 'partial_update',
-#     'delete': 'destroy',
-#     'post': 'create'
-# })
+router.register('likes', PostViewSet)
+router.register('profile', ProfileViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('v1/', include(router.urls)),
-    path('v1/account/', include('account.urls')),
+    path('v1/account/', include('account.urls'))
     # path('v1/comments/', comment_viewset),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
