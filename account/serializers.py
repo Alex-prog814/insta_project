@@ -62,7 +62,20 @@ class LoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('email', 'image')
+        fields = ('email', 'image', 'id', 'username')
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if instance.followers.all().count() > 0:
+            followings_object_list = instance.followers.filter(follower=instance)
+            followings_list = [follow.user.email for follow in followings_object_list]
+            representation['followings'] = followings_list
+        if instance.followings.all().count() > 0:
+            followers_object_list = instance.followings.filter(user=instance)
+            followers_list = [follow.follower.email for follow in followers_object_list]
+            representation['followers'] = followers_list
+        return representation
+
 
 
 

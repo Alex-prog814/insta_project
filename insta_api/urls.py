@@ -28,9 +28,10 @@ router.register('posts', PostViewSet)
 router.register('likes', PostViewSet)
 router.register('profile', ProfileViewSet)
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('v1/', include(router.urls)),
-    path('v1/account/', include('account.urls'))
-    # path('v1/comments/', comment_viewset),
+    path('v1/account/', include('account.urls')),
+    path('v1/', include('main.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -50,7 +50,7 @@ class ProfileViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, Generic
     serializer_class = UserSerializer
 
     def get_permissions(self):
-        if self.action == 'get':
+        if self.action == 'retrieve':
             permission_classes = [IsAuthenticated, ]
         else:
             permission_classes = [IsProfileOwner, ]

@@ -8,9 +8,15 @@ from rest_framework.response import Response
 from django_filters import rest_framework as filters
 
 from .mixins import LikedMixin
-from .models import Post, Comment, Tag
+from .models import Post, Comment, Tag, Follow
 from .permissions import IsPostAuthor
-from .serializers import PostSerializer, CommentSerializer, TagSerializer
+from .serializers import PostSerializer, CommentSerializer, TagSerializer, FollowSerializer
+
+
+class FollowersList(generics.ListCreateAPIView):
+    queryset = Follow.objects.all()
+    serializer_class = FollowSerializer
+    permission_classes = [IsAuthenticated, ]
 
 
 class CharFilterInFilter(filters.BaseInFilter, filters.CharFilter):
@@ -30,6 +36,8 @@ class PostViewSet(LikedMixin, viewsets.ModelViewSet):
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated, IsPostAuthor]
     filterset_class = TagFilter
+
+
 
     def get_serializer_context(self):
         return {'request': self.request}
