@@ -1,11 +1,34 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from .models import Post, Comment, Tag
+from .models import Post, Comment, Tag, Follow
 
 from main import services as likes_services
 
 User = get_user_model()
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follow
+        fields = ('user', )
+
+    def create(self, validated_data):
+        user_to_follow = validated_data.get('user') #на кого подписаться
+        user_who_is_following = self.context['request'].user #подписчик
+
+        if Follow.objects.filter(user=user_to_follow, follower=user_who_is_following).exists():
+            msg = "This user is already followings"
+            raise serializers.ValidationError(msg)
+        elif user_who_is_following.id == user_to_follow.id:
+            msg = "User cannot follow itself"
+            raise serializers.ValidationError(msg)
+        else:
+            follow = Follow.objects.create(
+                user=user_to_follow,
+                follower=user_who_is_following
+            )
+            return follow
 
 
 class FanSerializer(serializers.ModelSerializer):
