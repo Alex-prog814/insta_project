@@ -6,9 +6,10 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import generics
 from rest_framework.viewsets import GenericViewSet
 
-from account.serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from account.serializers import RegisterSerializer, LoginSerializer, UserSerializer, UsersListSerializer
 from main.permissions import IsProfileOwner
 
 User = get_user_model()
@@ -24,7 +25,7 @@ class RegistrationView(APIView):
 
 class ActivationView(APIView):
     def get(self, request, activation_code):
-        User = get_user_model()
+
         user = get_object_or_404(User, activation_code=activation_code)
         user.is_active = True
         user.activation_code = ''
@@ -55,3 +56,15 @@ class ProfileViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, Generic
         else:
             permission_classes = [IsProfileOwner, ]
         return [permission() for permission in permission_classes]
+
+
+class UsersListViewSet(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UsersListSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        q = self.request.query_params.get('q')
+        if q is not None:
+            queryset = queryset.filter(email__icontains=q)
+        return queryset

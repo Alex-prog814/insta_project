@@ -21,6 +21,7 @@ from rest_framework.routers import DefaultRouter
 
 from account.views import ProfileViewSet
 from main.views import PostViewSet, CommentViewSet
+from account.views import UsersListViewSet
 
 router = DefaultRouter()
 router.register('comments', CommentViewSet)
