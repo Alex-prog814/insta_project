@@ -31,7 +31,6 @@ class Post(models.Model):
     author = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='posts')
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    image = models.ImageField(upload_to='posts', blank=True)
     tags = models.ManyToManyField(Tag, related_name='tags', blank=True)
     likes = GenericRelation(Like)
 
@@ -51,3 +50,8 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text
+
+
+class PostImage(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
+    images = models.ImageField(upload_to='posts')

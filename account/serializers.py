@@ -60,9 +60,11 @@ class LoginSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    username = serializers.EmailField(source='email')
+
     class Meta:
         model = User
-        fields = ('email', 'image', 'id', 'username')
+        fields = ('username', 'image', 'id')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -75,9 +77,6 @@ class UserSerializer(serializers.ModelSerializer):
             followers_list = [follow.follower.email for follow in followers_object_list]
             representation['followers'] = followers_list
         return representation
-
-
-
 
 class UsersListSerializer(serializers.ModelSerializer):
     class Meta:

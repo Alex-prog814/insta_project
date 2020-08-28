@@ -38,7 +38,6 @@ class PostViewSet(LikedMixin, viewsets.ModelViewSet):
     filterset_class = TagFilter
 
 
-
     def get_serializer_context(self):
         return {'request': self.request}
 
