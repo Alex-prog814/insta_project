@@ -26,7 +26,7 @@ from account.views import UsersListViewSet
 router = DefaultRouter()
 router.register('comments', CommentViewSet)
 router.register('posts', PostViewSet)
-router.register('likes', PostViewSet)
+# router.register('likes', PostViewSet)
 router.register('profile', ProfileViewSet)
 
 

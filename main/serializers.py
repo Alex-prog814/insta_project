@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from .models import Post, Comment, Tag, Follow
+from .models import Post, Comment, Tag, Follow, PostImage
 
 from main import services as likes_services
 
@@ -69,14 +69,36 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('title', 'slug')
 
 
+class PostImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostImage
+        fields = ('images', )
+
+    def _get_image_url(self, obj):
+        if obj.images:
+            url = obj.images.url
+            request = self.context.get('request')
+            if request is not None:
+                url = request.build_absolute_uri(url)
+        else:
+            url = ''
+        return url
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['images'] = self._get_image_url(instance)
+        return representation
+
+
 class PostSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format='%d-%m-%Y %H:%M:%S', read_only=True)
     tags = serializers.SlugRelatedField(queryset=Tag.objects.all(), many=True, slug_field='slug')
     is_fan = serializers.SerializerMethodField()
+    images = serializers.ListField(child=serializers.ImageField(), write_only=True)
 
     class Meta:
         model = Post
-        fields = ('text', 'image', 'created_at', 'id', 'tags', 'is_fan',  'total_likes')
+        fields = ('text', 'images', 'created_at', 'id', 'tags', 'is_fan',  'total_likes')
 
     def get_is_fan(self, obj) -> bool:
         """Проверяет, лайкнул ли `request.user` твит (`obj`).
@@ -84,23 +106,18 @@ class PostSerializer(serializers.ModelSerializer):
         user = self.context.get('request').user
         return likes_services.is_fan(obj, user)
 
-    def __get_image_url(self, instance):
-        request = self.context.get('request')
-        if instance.image:
-            url = instance.image.url
-            if request is not None:
-                url = request.build_absolute_uri(url)
-        else:
-            url = ''
-        return url
-
     def create(self, validated_data):
+        print(validated_data)
         request = self.context.get('request')
         validated_data['author_id'] = request.user.id
         tags = validated_data.pop('tags')
+        images = validated_data.pop('images')
         post = Post.objects.create(**validated_data)
         for tag in tags:
             post.tags.add(tag)
+        print(images)
+        for image in images:
+            PostImage.objects.create(post=post, images=image)
         return post
 
     def to_representation(self, instance):
@@ -109,7 +126,7 @@ class PostSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['text'] = instance.text
         representation['author'] = instance.author.email
-        representation['image'] = self.__get_image_url(instance)
+        representation['images'] = PostImageSerializer(instance.images.all(), many=True, context=self.context).data
         return representation
 
 
