@@ -78,7 +78,6 @@ class UserSerializer(serializers.ModelSerializer):
             representation['followers'] = followers_list
         return representation
 
-
 class UsersListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
